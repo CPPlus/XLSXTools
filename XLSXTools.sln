@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XLSXTools", "XLSXTools\XLSXTools.csproj", "{D81A0897-5F6B-49F9-8D3F-F63E0294CD9B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{4067FE82-7BDD-4175-94C8-A5F67B4D3A6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D81A0897-5F6B-49F9-8D3F-F63E0294CD9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D81A0897-5F6B-49F9-8D3F-F63E0294CD9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D81A0897-5F6B-49F9-8D3F-F63E0294CD9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4067FE82-7BDD-4175-94C8-A5F67B4D3A6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4067FE82-7BDD-4175-94C8-A5F67B4D3A6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4067FE82-7BDD-4175-94C8-A5F67B4D3A6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4067FE82-7BDD-4175-94C8-A5F67B4D3A6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
