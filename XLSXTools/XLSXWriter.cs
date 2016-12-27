@@ -125,7 +125,6 @@ namespace XLSXTools
             }
 
             Text cellValue = new Text(value);
-            cell.Append(cellValue);
 
             InlineString inlineString = new InlineString();
 
