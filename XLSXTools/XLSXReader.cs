@@ -30,9 +30,9 @@ namespace XLSXTools
             TrackDateStyleIndices();
 
             openXmlReader = OpenXmlReader.Create(worksheetPart);
-            ReadUntilDimensionData();
+            // ReadUntilDimensionData();
 
-            GetRowCount();
+            // GetRowCount();
         }
 
         public void SetSheet(string sheetName)
@@ -85,10 +85,30 @@ namespace XLSXTools
                     bool success = styleIndicesWithNumberFormat.TryGetValue(cell.StyleIndex, out numberFormatId);
                     if (success)
                     {
-                        if (numberFormatId == 14)
+                        string formatString = null;
+
+                        switch (numberFormatId)
                         {
-                            value = DateTime.FromOADate(int.Parse(value)).ToString("M/d/yyyy");
+                            case 14: formatString = "M/d/yyyy"; break;
+                            case 15: formatString = "d-mmm-yy"; break;
+                            case 16: formatString = "d-mmm"; break;
+                            case 17: formatString = "mmm-yy"; break;
+                            case 18: formatString = "h:mm tt"; break;
+                            case 19: formatString = "h:mm:ss tt"; break;
+                            case 20: formatString = "H:mm"; break;
+                            case 21: formatString = "H:mm: ss"; break;
                         }
+
+                        if (formatString != null)
+                        {
+                            int result;
+                            success = int.TryParse(value, out result);
+                            if (success)
+                            {
+                                value = DateTime.FromOADate(result).ToString(formatString);
+                            }
+                        }
+                            
                     } else
                     {
                         Console.WriteLine("Key not found.");
@@ -104,7 +124,10 @@ namespace XLSXTools
                             var stringTable = workbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
                             if (stringTable != null)
                             {
-                                value = stringTable.SharedStringTable.ElementAt(int.Parse(value)).InnerText;
+                                int result;
+                                bool success = int.TryParse(value, out result);
+                                if (success)
+                                    value = stringTable.SharedStringTable.ElementAt(result).InnerText;
                             }
                             break;
 

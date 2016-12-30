@@ -11,10 +11,10 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            XLSXReader reader = new XLSXReader("read.xlsx");
+            XLSXReader reader = new XLSXReader("Calculations.xlsx");
             while (reader.ReadNextCell())
             {
-                Console.WriteLine(reader.GetCellValue(reader.CurrentCell));
+                // Console.WriteLine(reader.GetCellValue(reader.CurrentCell));
             }
             reader.Close();
 
