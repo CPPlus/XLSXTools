@@ -283,13 +283,25 @@ namespace XLSXTools
                 PatternFill = redPatternFill
             };
 
+            PatternFill greenPatternFill = new PatternFill()
+            {
+                PatternType = PatternValues.Solid
+            };
+            greenPatternFill.ForegroundColor = new ForegroundColor { Rgb = HexBinaryValue.FromString("C6E0B4") }; // green fill
+            greenPatternFill.BackgroundColor = new BackgroundColor { Indexed = 64 };
+            Fill greenFill = new Fill()
+            {
+                PatternFill = greenPatternFill
+            };
+
             Fills fills = new Fills();             
             fills.Append(defaultFill);
             fills.Append(defaultFill2);
             fills.Append(yellowFill);
             fills.Append(blueFill);
             fills.Append(redFill);
-            fills.Count = 5;
+            fills.Append(greenFill);
+            fills.Count = 6;
 
             // Borders.
             Border defaultBorder = new Border();   
@@ -303,13 +315,15 @@ namespace XLSXTools
             CellFormat yellowFillCellFormat = new CellFormat() { FontId = 0, FillId = 2, BorderId = 0, ApplyFill = true };
             CellFormat blueFillCellFormat = new CellFormat() { FontId = 0, FillId = 3, BorderId = 0, ApplyFill = true };
             CellFormat redFillCellFormat = new CellFormat() { FontId = 0, FillId = 4, BorderId = 0, ApplyFill = true };
+            CellFormat greenFillCellFormat = new CellFormat() { FontId = 0, FillId = 5, BorderId = 0, ApplyFill = true };
 
             CellFormats cellFormats = new CellFormats();
             cellFormats.Append(defaultCellFormat);
             cellFormats.Append(yellowFillCellFormat);
             cellFormats.Append(blueFillCellFormat);
             cellFormats.Append(redFillCellFormat);
-            cellFormats.Count = 4;
+            cellFormats.Append(greenFillCellFormat);
+            cellFormats.Count = 5;
 
             // Append fonts, fills, borders and cell formats.
             stylesheet.Append(fonts);
@@ -320,5 +334,7 @@ namespace XLSXTools
             // Save.
             workbookStylesPart.Stylesheet.Save();
         }
+
+
     }
 }

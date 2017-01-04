@@ -30,9 +30,9 @@ namespace XLSXTools
             TrackDateStyleIndices();
 
             openXmlReader = OpenXmlReader.Create(worksheetPart);
-            // ReadUntilDimensionData();
+            ReadUntilDimensionData();
 
-            // GetRowCount();
+            GetRowCount();
         }
 
         public void SetSheet(string sheetName)
@@ -47,6 +47,8 @@ namespace XLSXTools
                     openXmlReader.Close();
                     openXmlReader = null;
                 }
+
+                openXmlReader = OpenXmlReader.Create(this.worksheetPart);
             }
             else
             {
@@ -158,6 +160,12 @@ namespace XLSXTools
         {
             string endCellReference = usedRange.Split(':')[1];
             return XLSXUtils.CellReferenceToRowIndex(endCellReference);
+        }
+
+        public int GetColumnCount()
+        {
+            string endCellReference = usedRange.Split(':')[1];
+            return XLSXUtils.CellReferenceToColumnIndex(endCellReference);
         }
 
         public void Close()

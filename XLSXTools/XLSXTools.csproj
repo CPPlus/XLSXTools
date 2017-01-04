@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Styles.cs" />
     <Compile Include="XLSXReader.cs" />
     <Compile Include="XLSXUtils.cs" />
     <Compile Include="XLSXWriter.cs" />
