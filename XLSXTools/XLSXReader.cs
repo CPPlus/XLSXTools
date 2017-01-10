@@ -19,20 +19,75 @@ namespace XLSXTools
         public Cell CurrentCell { get; private set; }
 
         private Dictionary<uint, uint> styleIndicesWithNumberFormat;
-        private string usedRange;
+        public string UsedRange { get; private set; }
 
-        public XLSXReader(string path)
+        private string path;
+
+        public string CurrentCellAddress
         {
-            spreadsheetDocument = SpreadsheetDocument.Open(path, true);
-            workbookPart = spreadsheetDocument.WorkbookPart;
-            worksheetPart = workbookPart.WorksheetParts.First();
+            get
+            {
+                return GetCellReference(CurrentCell);
+            }
+        }
 
-            TrackDateStyleIndices();
+        public int CurrentCellColumnIndex
+        {
+            get
+            {
+                return XLSXUtils.CellReferenceToColumnIndex(CurrentCellAddress);
+            }
+        }
 
-            openXmlReader = OpenXmlReader.Create(worksheetPart);
-            ReadUntilDimensionData();
+        public int CurrentCellRowIndex
+        {
+            get
+            {
+                return XLSXUtils.CellReferenceToRowIndex(CurrentCellAddress);
+            }
+        }
 
-            GetRowCount();
+        public int RowCount
+        {
+            get
+            {
+                string endCellReference = UsedRange.Split(':')[1];
+                return XLSXUtils.CellReferenceToRowIndex(endCellReference);
+            }
+        }
+
+        public int ColumnCount
+        {
+            get
+            {
+                string endCellReference = UsedRange.Split(':')[1];
+                return XLSXUtils.CellReferenceToColumnIndex(endCellReference);
+            }
+        }
+
+        public bool EOF
+        {
+            get
+            {
+                return openXmlReader.EOF;
+            }
+        }
+
+        public XLSXReader(string path) : this(path, "Sheet1")
+        {
+
+        }
+
+        public XLSXReader(string path, string sheet)
+        {
+            this.path = path;
+            
+            SetupReader();
+            SetSheet(sheet);
+            CalculateUsedRange();
+            // ReadUntilDimensionData();
+
+            SetupReader();
         }
 
         public void SetSheet(string sheetName)
@@ -156,18 +211,6 @@ namespace XLSXTools
             return cell.CellReference.Value;
         }
 
-        public int GetRowCount()
-        {
-            string endCellReference = usedRange.Split(':')[1];
-            return XLSXUtils.CellReferenceToRowIndex(endCellReference);
-        }
-
-        public int GetColumnCount()
-        {
-            string endCellReference = usedRange.Split(':')[1];
-            return XLSXUtils.CellReferenceToColumnIndex(endCellReference);
-        }
-
         public void Close()
         {
             if (openXmlReader != null)
@@ -176,14 +219,59 @@ namespace XLSXTools
                 openXmlReader = null;
             }
             
-            spreadsheetDocument.Close();
+            if (spreadsheetDocument != null)
+            {
+                spreadsheetDocument.Close();
+                spreadsheetDocument = null;
+            }
+        }
+
+        private void CalculateUsedRange()
+        {
+            int rowCount = 0;
+            int columnCount = 0;
+
+            while (openXmlReader.Read())
+            {
+                if (openXmlReader.ElementType == typeof(Cell))
+                {
+                    Cell cell = (Cell)openXmlReader.LoadCurrentElement();
+                    string cellValue = GetCellValue(cell);
+                    
+                    if (!cellValue.Equals(""))
+                    {
+                        string cellAddress = GetCellReference(cell);
+                        int rowIndex = XLSXUtils.CellReferenceToRowIndex(cellAddress);
+
+                        int columnIndex = XLSXUtils.CellReferenceToColumnIndex(cellAddress);
+                        if (rowIndex > rowCount) rowCount = rowIndex;
+                        if (columnIndex > columnCount) columnCount = columnIndex;
+                    }
+                }
+            }
+
+            string columnCountLetter = XLSXUtils.ColumnIndexToLetter(columnCount);
+            UsedRange = string.Format("A1:{0}{1}", columnCountLetter, rowCount);
+        }
+
+        private void SetupReader()
+        {
+            Close();
+
+            spreadsheetDocument = SpreadsheetDocument.Open(path, true);
+            workbookPart = spreadsheetDocument.WorkbookPart;
+            worksheetPart = workbookPart.WorksheetParts.First();
+
+            TrackDateStyleIndices();
+
+            openXmlReader = OpenXmlReader.Create(worksheetPart);
         }
 
         private void ReadUntilDimensionData()
         {
             while (openXmlReader.Read() && openXmlReader.ElementType != typeof(SheetDimension)) { }
             SheetDimension sheetDimension = openXmlReader.LoadCurrentElement() as SheetDimension;
-            usedRange = sheetDimension.Reference;
+            UsedRange = sheetDimension.Reference;
         }
 
         private void TrackDateStyleIndices()

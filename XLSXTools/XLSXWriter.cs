@@ -157,8 +157,11 @@ namespace XLSXTools
 
         public void Close()
         {
-            openXmlWriter.Close();
-            spreadsheetDocument.Close();
+            if (openXmlWriter != null)
+                openXmlWriter.Close();
+
+            if (spreadsheetDocument != null)
+                spreadsheetDocument.Close();
         }
 
         private void WriteWorkbookPart()

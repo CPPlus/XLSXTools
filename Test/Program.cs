@@ -11,6 +11,7 @@ namespace Test
     {
         static void Main(string[] args)
         {
+            /*
             XLSXReader reader = new XLSXReader("Calculations.xlsx");
             while (reader.ReadNextCell())
             {
@@ -27,6 +28,17 @@ namespace Test
 
             writer.Finish();
             writer.Close();
+            */
+
+            XLSXRowReader reader = new XLSXRowReader(@"C:\Users\Grigorov\Documents\User Created\Tools\TheTool\TheTool\bin\Debug\tests\id_hash_generation\source.xlsx");
+            string[] record;
+            while (reader.ReadNextRecord(out record))
+            {
+                foreach (string field in record)
+                    Console.Write(field + ", ");
+                Console.WriteLine();
+            }
+            reader.Close();
         }
     }
 }
