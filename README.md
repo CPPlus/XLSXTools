@@ -3,7 +3,7 @@ OpenXML solution to read/write xlsx files.
 
 ## How to use?
 XLSXTools contains four usable classes - XLSXReader, XLSXRowReader, XLSXWriter and XLSXUtils. 
-The first three are used for reading and writing xlsx files respectively and the third one 
+The first three are used for reading and writing xlsx files respectively and the fourth one 
 has a few utility methods. 
 
 <i>Just make sure to add references to DocumentFormat.OpenXml and WindowsBase.</i>
