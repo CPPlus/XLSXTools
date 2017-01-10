@@ -13,11 +13,40 @@ This class is pretty straightforward.
 Keep in mind that the open xml format is such that if a cell is empty then it is omitted
 entirely. Track cell addresses to find if a given cell has been skipped.
 
+### Basic use:
 ```C#
 XLSXReader reader = new XLSXReader("file.xlsx");
+reader.SetSheet("Sheet1");
 while (reader.ReadNextCell())
 {
     Console.WriteLine(reader.GetCellValue(reader.CurrentCell));
+    Console.WriteLine(reader.GetCellReference(reader.CurrentCell));
+}
+reader.Close();
+```
+
+### Notable properties.
+These are the actual row and column counts respectively. Excel sometimes calculates a wrong
+used range, be it formatted cells without a value or some other reason. These properties are 
+calculated on instantiation by reading the whole file. If you don't need them and think that
+the instantiation is slow when you read big files you can comment this calculation out in the
+constructor.
+```C#
+int actualRowCount = reader.RowCount;
+int actualColumnCount = reader.ColumnCount;
+```
+
+## XLSXRowReader
+This class bypasses the empty cell skipping and reads the file row by row.
+Empty cells are replaced with string.Empty.
+```C#
+XLSXRowReader reader = new XLSXRowReader(@"file.xlsx");
+string[] record;
+while (reader.ReadNextRecord(out record))
+{
+    foreach (string field in record)
+        Console.Write(field + ", ");
+    Console.WriteLine();
 }
 reader.Close();
 ```
@@ -31,13 +60,16 @@ your data or the file will become corrupt.
 XLSXWriter writer = new XLSXWriter("write.xlsx");
 writer.Start();
 
-writer.Write("Test");
-writer.WriteInline("more test");
+writer.Write("This is a shared string text.");
+writer.WriteInline("This is an inline text");
 writer.Write(5);
+writer.Write("This is a colored cell", Styles.BLUE); // Add more styles in XLSXWriter's "WriteWorkbookStylesPart" method.
 
 writer.Finish();
 writer.Close();
 ```
 ### Note:
-The WriteInline() method is a lot faster, but the resulting file gets bigger 
-because shared strings are not used.
+The WriteInline() method is a lot faster, but the resulting file can sometimes get 
+bigger because shared strings are not used.
+
+
