@@ -63,6 +63,7 @@ writer.Start();
 
 writer.Write("This is a shared string text.");
 writer.WriteInline("This is an inline text");
+writer.NewRow();
 writer.Write(5);
 writer.Write("This is a colored cell", Styles.BLUE); // Add more styles in XLSXWriter's "WriteWorkbookStylesPart" method.
 
