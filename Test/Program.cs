@@ -30,7 +30,7 @@ namespace Test
             writer.Close();
             */
 
-            XLSXRowReader reader = new XLSXRowReader(@"C:\Users\Grigorov\Documents\User Created\Tools\TheTool\TheTool\bin\Debug\tests\id_hash_generation\source.xlsx");
+            XLSXRowReader reader = new XLSXRowReader(@"file.xlsx");
             string[] record;
             while (reader.ReadNextRecord(out record))
             {

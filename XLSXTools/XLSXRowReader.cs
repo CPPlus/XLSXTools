@@ -59,6 +59,11 @@ namespace XLSXTools
             ResetState();
         }
 
+        public void SetSheet(string sheetName)
+        {
+            reader.SetSheet(sheetName);
+        }
+
         public void Close()
         {
             reader.Close();
