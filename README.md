@@ -16,7 +16,7 @@ entirely. Track cell addresses to find if a given cell has been skipped.
 ### Basic use:
 ```C#
 XLSXReader reader = new XLSXReader("file.xlsx");
-reader.SetSheet("Sheet1");
+reader.SetSheet("Sheet1"); // Not needed. The first sheet is the default one.
 while (reader.ReadNextCell())
 {
     Console.WriteLine(reader.GetCellValue(reader.CurrentCell));
@@ -41,6 +41,7 @@ This class bypasses the empty cell skipping and reads the file row by row.
 Empty cells are replaced with string.Empty.
 ```C#
 XLSXRowReader reader = new XLSXRowReader(@"file.xlsx");
+reader.SetSheet("Sheet1"); // Not needed. The first sheet is the default one.
 string[] record;
 while (reader.ReadNextRecord(out record))
 {
