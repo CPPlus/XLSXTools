@@ -39,7 +39,14 @@ namespace XLSXTools
         {
             openXmlWriter = OpenXmlWriter.Create(worksheetPart);
 
-            openXmlWriter.WriteStartElement(new Worksheet());
+            List<OpenXmlAttribute> attributes = new List<OpenXmlAttribute>();
+            attributes.Add(new OpenXmlAttribute("xmlns", null, "http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
+            attributes.Add(new OpenXmlAttribute("xmlns:r", null, "http://schemas.openxmlformats.org/officeDocument/2006/relationships"));
+            attributes.Add(new OpenXmlAttribute("xmlns:mc", null, "http://schemas.openxmlformats.org/markup-compatibility/2006"));
+            attributes.Add(new OpenXmlAttribute("mc:Ignorable", null, "x14ac"));
+            attributes.Add(new OpenXmlAttribute("xmlns:x14ac", null, "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"));
+
+            openXmlWriter.WriteStartElement(new Worksheet(), attributes);
             openXmlWriter.WriteStartElement(new SheetData());
             openXmlWriter.WriteStartElement(new Row());
         }

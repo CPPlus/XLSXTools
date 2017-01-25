@@ -71,51 +71,37 @@ namespace XLSXTools
 
         public bool ReadNextRecord(out string[] record)
         {
-            if (!couldReadLast)
-            {
-                FillWithEmptyRecord(out record);
-                return false;
-            }
+            FillWithEmptyRecord(out record);
 
-            string[] result = new string[columnIndexToReadTo];
+            if (!couldReadLast) return false;
+
+
             rowIndexToRead++;
-
-            bool hasWrittenValue = false;
             do
             {
                 UpdateCellsState(reader.CurrentCell);
 
                 if (currentRowIndex == rowIndexToRead)
                 {
-                    result[currentColumnIndex - 1] = currentCellValue;
-                    hasWrittenValue = true;
-                }
-                else
-                {
-                    if (!hasWrittenValue)
-                        FillWithEmptyRecord(out result);
-                    hasWrittenValue = true;
-                    break;
-                }
-            } while (couldReadLast = reader.ReadNextCell());
+                    if (currentColumnIndex - 1 < columnIndexToReadTo)
+                    {
+                        record[currentColumnIndex - 1] = currentCellValue;
 
-            if (!couldReadLast)
-            {
-                if (!hasWrittenValue)
-                {
-                    FillWithEmptyRecord(out record);
-                    return false;
-                }
-            }
-            
-            record = result;
+                    }
+                    else
+                    {
+
+                    }
+                }  
+                else break;
+            } while (couldReadLast = reader.ReadNextCell());
 
             return true;
         }
 
         private void FillWithEmptyRecord(out string[] record)
         {
-            record = new string[reader.ColumnCount];
+            record = new string[columnIndexToReadTo];
             for (int i = 0; i < record.Length; i++)
             {
                 record[i] = string.Empty;

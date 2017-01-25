@@ -21,6 +21,9 @@ namespace XLSXTools
         private Dictionary<uint, uint> styleIndicesWithNumberFormat;
         public string UsedRange { get; private set; }
 
+        private int rowCount = -1;
+        private int columnCount = -1;
+
         private string path;
 
         public string CurrentCellAddress
@@ -51,8 +54,12 @@ namespace XLSXTools
         {
             get
             {
-                string endCellReference = UsedRange.Split(':')[1];
-                return XLSXUtils.CellReferenceToRowIndex(endCellReference);
+                if (rowCount == -1)
+                {
+                    string endCellReference = UsedRange.Split(':')[1];
+                    rowCount = XLSXUtils.CellReferenceToRowIndex(endCellReference);
+                }
+                return rowCount;
             }
         }
 
@@ -60,8 +67,12 @@ namespace XLSXTools
         {
             get
             {
-                string endCellReference = UsedRange.Split(':')[1];
-                return XLSXUtils.CellReferenceToColumnIndex(endCellReference);
+                if (columnCount == -1)
+                {
+                    string endCellReference = UsedRange.Split(':')[1];
+                    columnCount = XLSXUtils.CellReferenceToColumnIndex(endCellReference);
+                }
+                return columnCount;
             }
         }
 
@@ -84,8 +95,8 @@ namespace XLSXTools
             
             SetupReader();
             SetSheet(sheet);
-            CalculateUsedRange();
-            // ReadUntilDimensionData();
+            //CalculateUsedRange();
+            ReadUntilDimensionData();
 
             SetupReader();
         }
