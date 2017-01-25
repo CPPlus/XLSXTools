@@ -30,7 +30,7 @@ These are the actual row and column counts respectively. Excel sometimes calcula
 used range, be it formatted cells without a value or some other reason. These properties are 
 calculated on instantiation by reading the whole file. If you don't need them and think that
 the instantiation is slow when you read big files you can comment this calculation out in the
-constructor.
+constructor and switch it with the excels range instead.
 ```C#
 int actualRowCount = reader.RowCount;
 int actualColumnCount = reader.ColumnCount;
@@ -53,19 +53,34 @@ reader.Close();
 ```
 
 ## XLSXWriter
-The writer is also simple. Just make sure to call the Start() method before
-writing anything. Also call the Finish() and Close() methods after writing out
+The writer is also simple. Just make sure to call the Finish() and Close() methods after writing out
 your data or the file will become corrupt.
 
 ```C#
 XLSXWriter writer = new XLSXWriter("write.xlsx");
-writer.Start();
 
-writer.Write("This is a shared string text.");
-writer.WriteInline("This is an inline text");
+// Write a sheet.
+writer.SetWorksheet("MyTestSheet1");
+
+writer.Write("Id");
+writer.WriteInline("Product");
+writer.Write("Price");
 writer.NewRow();
-writer.Write(5);
-writer.Write("This is a colored cell", Styles.BLUE); // Add more styles in XLSXWriter's "WriteWorkbookStylesPart" method.
+
+writer.Write(1);
+writer.WriteInline("Apple");
+writer.Write(2.3M);
+writer.NewRow();
+
+// Write another sheet.
+writer.SetWorksheet("MyTestSheetTWO");
+
+writer.Write("Id");
+writer.NewRow();
+
+writer.Write(1);
+writer.WriteInline("LOL");
+writer.NewRow();
 
 writer.Finish();
 writer.Close();
