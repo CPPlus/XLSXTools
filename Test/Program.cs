@@ -21,7 +21,9 @@ namespace Test
             */
 
             XLSXWriter writer = new XLSXWriter("write.xlsx");
-            writer.Start();
+
+            // Write a sheet.
+            writer.SetWorksheet("MyTestSheet1");
 
             writer.Write("Id");
             writer.WriteInline("Product");
@@ -31,6 +33,16 @@ namespace Test
             writer.Write(1);
             writer.WriteInline("Apple");
             writer.Write(2.3M);
+            writer.NewRow();
+
+            // Write another sheet.
+            writer.SetWorksheet("MyTestSheetTWO");
+
+            writer.Write("Id");
+            writer.NewRow();
+
+            writer.Write(1);
+            writer.WriteInline("LOL");
             writer.NewRow();
 
             writer.Finish();

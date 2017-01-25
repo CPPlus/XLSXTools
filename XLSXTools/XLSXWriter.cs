@@ -12,55 +12,61 @@ namespace XLSXTools
     public class XLSXWriter
     {
         private SpreadsheetDocument spreadsheetDocument;
-        private WorkbookPart workbookPart;
-        private WorksheetPart worksheetPart;
         private SharedStringTablePart sharedStringTablePart;
-        private uint lastSheetId = 1;
-        private int lastCellRowIndex = 1;
-        private int lastCellColumnIndex = 1;
-        private OpenXmlWriter openXmlWriter;
-        public int RowsWritten { get; private set; }
+
+        private WorkbookPart workbookPart;
+        private OpenXmlWriter workbookWriter;
+
+        private Dictionary<string, WorksheetData> worksheetDataMaps;
+        private WorksheetData activeWorksheetData;
+        private List<WorksheetData> worksheetDatas;
+        private uint lastSheetId = 0;
 
         public XLSXWriter(string path)
         {
             spreadsheetDocument = SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook);
-            workbookPart = spreadsheetDocument.AddWorkbookPart();
-            worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
 
-            WriteWorkbookPart();
+            workbookPart = spreadsheetDocument.AddWorkbookPart();
+            workbookWriter = OpenXmlWriter.Create(workbookPart);
+
+            worksheetDataMaps = new Dictionary<string, WorksheetData>();
+            worksheetDatas = new List<WorksheetData>();
+            StartWorkbookPart();
+
             WriteSharedStringTablePart();
             WriteWorkbookStylesPart();
-
-            RowsWritten = 0;
         }
 
-        // Call before writing anything.
-        public void Start()
+        public void SetWorksheet(string name)
         {
-            openXmlWriter = OpenXmlWriter.Create(worksheetPart);
+            WorksheetData data = null;
+            if (worksheetDataMaps.ContainsKey(name))
+            {
+                worksheetDataMaps.TryGetValue(name, out data);
+            } else
+            {
+                data = new WorksheetData(workbookPart);
+                worksheetDatas.Add(data);
+                AddSheet(name, workbookWriter);
+                worksheetDataMaps.Add(name, data);
 
-            List<OpenXmlAttribute> attributes = new List<OpenXmlAttribute>();
-            attributes.Add(new OpenXmlAttribute("xmlns", null, "http://schemas.openxmlformats.org/spreadsheetml/2006/main"));
-            attributes.Add(new OpenXmlAttribute("xmlns:r", null, "http://schemas.openxmlformats.org/officeDocument/2006/relationships"));
-            attributes.Add(new OpenXmlAttribute("xmlns:mc", null, "http://schemas.openxmlformats.org/markup-compatibility/2006"));
-            attributes.Add(new OpenXmlAttribute("mc:Ignorable", null, "x14ac"));
-            attributes.Add(new OpenXmlAttribute("xmlns:x14ac", null, "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"));
-
-            openXmlWriter.WriteStartElement(new Worksheet(), attributes);
-            openXmlWriter.WriteStartElement(new SheetData());
-            openXmlWriter.WriteStartElement(new Row());
+                data.Writer.WriteStartElement(new Worksheet());
+                data.Writer.WriteStartElement(new SheetData());
+                data.Writer.WriteStartElement(new Row());
+            }
+            activeWorksheetData = data;
         }
 
         public void JumpForwardTo(string cellReference)
         {
             int rowIndex = XLSXUtils.CellReferenceToRowIndex(cellReference);
-            for (int i = lastCellRowIndex; i < rowIndex; i++)
+            for (int i = activeWorksheetData.LastCellRowIndex; i < rowIndex; i++)
             {
                 NewRow();
             }
 
             int columnIndex = XLSXUtils.CellReferenceToColumnIndex(cellReference);
-            lastCellColumnIndex = columnIndex;
+            activeWorksheetData.LastCellColumnIndex = columnIndex;
         }
 
         // Writes a value to the cell to the right of 
@@ -111,9 +117,9 @@ namespace XLSXTools
             CellValue cellValue = new CellValue(value.ToString());
             cell.Append(cellValue);
 
-            openXmlWriter.WriteStartElement(cell, attributes);
-            openXmlWriter.WriteElement(cellValue);
-            openXmlWriter.WriteEndElement();
+            activeWorksheetData.Writer.WriteStartElement(cell, attributes);
+            activeWorksheetData.Writer.WriteElement(cellValue);
+            activeWorksheetData.Writer.WriteEndElement();
 
             return cellReference;
         }
@@ -135,65 +141,62 @@ namespace XLSXTools
 
             InlineString inlineString = new InlineString();
 
-            openXmlWriter.WriteStartElement(cell, attributes);
-            openXmlWriter.WriteStartElement(inlineString);
-            openXmlWriter.WriteElement(cellValue);
-            openXmlWriter.WriteEndElement();
-            openXmlWriter.WriteEndElement();
+            activeWorksheetData.Writer.WriteStartElement(cell, attributes);
+            activeWorksheetData.Writer.WriteStartElement(inlineString);
+            activeWorksheetData.Writer.WriteElement(cellValue);
+            activeWorksheetData.Writer.WriteEndElement();
+            activeWorksheetData.Writer.WriteEndElement();
 
             return cellReference;
         }
 
         public void NewRow()
         {
-            openXmlWriter.WriteEndElement();
-            openXmlWriter.WriteStartElement(new Row());
-            lastCellRowIndex++;
-            lastCellColumnIndex = 1;
-
-            RowsWritten++;
+            activeWorksheetData.Writer.WriteEndElement();
+            activeWorksheetData.Writer.WriteStartElement(new Row());
+            activeWorksheetData.LastCellRowIndex++;
+            activeWorksheetData.LastCellColumnIndex = 1;
         }
 
         // Call after last call to 'Write'.
         public void Finish()
         {
-            openXmlWriter.WriteEndElement();
-            openXmlWriter.WriteEndElement();
-            openXmlWriter.WriteEndElement();
+            for (int i = 0; i < worksheetDatas.Count; i++)
+            {
+                worksheetDatas[i].Writer.WriteEndElement();
+                worksheetDatas[i].Writer.WriteEndElement();
+                worksheetDatas[i].Writer.WriteEndElement();
+            }
+
+            FinishWorkbookPart();
         }
 
         public void Close()
         {
-            if (openXmlWriter != null)
-                openXmlWriter.Close();
+            for (int i = 0; i < worksheetDatas.Count; i++)
+                worksheetDatas[i].Writer.Close();
 
             if (spreadsheetDocument != null)
                 spreadsheetDocument.Close();
         }
 
-        private void WriteWorkbookPart()
+        private void StartWorkbookPart()
         {
-            OpenXmlWriter openXmlWriter = OpenXmlWriter.Create(spreadsheetDocument.WorkbookPart);
-
-            openXmlWriter.WriteStartElement(new Workbook());
-            openXmlWriter.WriteStartElement(new Sheets());
-
-            AddSheets(openXmlWriter);
-            
-            openXmlWriter.WriteEndElement();
-            openXmlWriter.WriteEndElement();
-
-            openXmlWriter.Close();
+            workbookWriter.WriteStartElement(new Workbook());
+            workbookWriter.WriteStartElement(new Sheets());
         }
 
-        private void AddSheets(OpenXmlWriter openXmlWriter)
+        private void FinishWorkbookPart()
         {
-            AddSheet("Sheet1", openXmlWriter);
+            workbookWriter.WriteEndElement();
+            workbookWriter.WriteEndElement();
+
+            workbookWriter.Close();
         }
 
         private string GetCurrentCellReference()
         {
-            return XLSXUtils.ColumnIndexToLetter(lastCellColumnIndex++) + lastCellRowIndex;
+            return XLSXUtils.ColumnIndexToLetter(activeWorksheetData.LastCellColumnIndex++) + activeWorksheetData.LastCellRowIndex;
         }
 
         private void AddSheet(string name, OpenXmlWriter openXmlWriter)
@@ -201,9 +204,10 @@ namespace XLSXTools
             Sheet sheet = new Sheet()
             {
                 Name = name,
-                SheetId = lastSheetId++,
-                Id = workbookPart.GetIdOfPart(worksheetPart)
+                SheetId = lastSheetId + 1,
+                Id = workbookPart.GetIdOfPart(worksheetDatas[(int)lastSheetId].WorksheetPart)
             };
+            lastSheetId++;
             openXmlWriter.WriteElement(sheet);
         }
 
