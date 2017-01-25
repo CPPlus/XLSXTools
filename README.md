@@ -2,11 +2,11 @@
 OpenXML solution to read/write xlsx files.
 
 ## How to use?
-XLSXTools contains three usable classes - XLSXReader, XLSXWriter and XLSXUtils. 
-The first two are used for reading and writing xlsx files respectively and the third one 
+XLSXTools contains four usable classes - XLSXReader, XLSXRowReader, XLSXWriter and XLSXUtils. 
+The first three are used for reading and writing xlsx files respectively and the fourth one 
 has a few utility methods. 
 
-<i>Just make sure to add references to DocumentFormat.OpenXml andWindowsBase.</i>
+<i>Just make sure to add references to DocumentFormat.OpenXml and WindowsBase.</i>
 
 ## XLSXReader
 This class is pretty straightforward. 
@@ -16,7 +16,7 @@ entirely. Track cell addresses to find if a given cell has been skipped.
 ### Basic use:
 ```C#
 XLSXReader reader = new XLSXReader("file.xlsx");
-reader.SetSheet("Sheet1");
+reader.SetSheet("Sheet1"); // Not needed. The first sheet is the default one.
 while (reader.ReadNextCell())
 {
     Console.WriteLine(reader.GetCellValue(reader.CurrentCell));
@@ -41,6 +41,7 @@ This class bypasses the empty cell skipping and reads the file row by row.
 Empty cells are replaced with string.Empty.
 ```C#
 XLSXRowReader reader = new XLSXRowReader(@"file.xlsx");
+reader.SetSheet("Sheet1"); // Not needed. The first sheet is the default one.
 string[] record;
 while (reader.ReadNextRecord(out record))
 {
@@ -62,6 +63,7 @@ writer.Start();
 
 writer.Write("This is a shared string text.");
 writer.WriteInline("This is an inline text");
+writer.NewRow();
 writer.Write(5);
 writer.Write("This is a colored cell", Styles.BLUE); // Add more styles in XLSXWriter's "WriteWorkbookStylesPart" method.
 
