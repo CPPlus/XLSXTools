@@ -308,6 +308,17 @@ namespace XLSXTools
                 PatternFill = greenPatternFill
             };
 
+            PatternFill grayPatternFill = new PatternFill()
+            {
+                PatternType = PatternValues.Solid
+            };
+            grayPatternFill.ForegroundColor = new ForegroundColor { Rgb = HexBinaryValue.FromString("d7d7d7") }; // gray fill
+            grayPatternFill.BackgroundColor = new BackgroundColor { Indexed = 64 };
+            Fill grayFill = new Fill()
+            {
+                PatternFill = grayPatternFill
+            };
+
             Fills fills = new Fills();             
             fills.Append(defaultFill);
             fills.Append(defaultFill2);
@@ -315,7 +326,8 @@ namespace XLSXTools
             fills.Append(blueFill);
             fills.Append(redFill);
             fills.Append(greenFill);
-            fills.Count = 6;
+            fills.Append(grayFill);
+            fills.Count = 7;
 
             // Borders.
             Border defaultBorder = new Border();   
@@ -330,6 +342,7 @@ namespace XLSXTools
             CellFormat blueFillCellFormat = new CellFormat() { FontId = 0, FillId = 3, BorderId = 0, ApplyFill = true };
             CellFormat redFillCellFormat = new CellFormat() { FontId = 0, FillId = 4, BorderId = 0, ApplyFill = true };
             CellFormat greenFillCellFormat = new CellFormat() { FontId = 0, FillId = 5, BorderId = 0, ApplyFill = true };
+            CellFormat grayFillCellFormat = new CellFormat() { FontId = 0, FillId = 6, BorderId = 0, ApplyFill = true };
 
             CellFormats cellFormats = new CellFormats();
             cellFormats.Append(defaultCellFormat);
@@ -337,7 +350,8 @@ namespace XLSXTools
             cellFormats.Append(blueFillCellFormat);
             cellFormats.Append(redFillCellFormat);
             cellFormats.Append(greenFillCellFormat);
-            cellFormats.Count = 5;
+            cellFormats.Append(grayFillCellFormat);
+            cellFormats.Count = 6;
 
             // Append fonts, fills, borders and cell formats.
             stylesheet.Append(fonts);

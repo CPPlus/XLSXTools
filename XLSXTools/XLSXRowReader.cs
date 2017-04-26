@@ -14,6 +14,8 @@ namespace XLSXTools
         private int currentColumnIndex = 0;
         private string currentCellValue = null;
         private bool couldReadLast = true;
+        private bool customRangeCalculation;
+        private int rowStart;
 
         private int rowIndexToReadTo = 0;
         private int columnIndexToReadTo = 0;
@@ -46,22 +48,19 @@ namespace XLSXTools
             }
         }
 
-        public XLSXRowReader(string srcFilePath) : this(srcFilePath, "Sheet1")
+        public XLSXRowReader(string srcFilePath, bool customRangeCalculation = false, int rowStart = 0) : this(srcFilePath, "Sheet1", customRangeCalculation, rowStart)
         {
 
         }
 
-        public XLSXRowReader(string srcFilePath, string sheetName)
+        public XLSXRowReader(string srcFilePath, string sheetName, bool customRangeCalculation = false, int rowStart = 0)
         {
             this.srcFilePath = srcFilePath;
             this.sheetName = sheetName;
+            this.customRangeCalculation = customRangeCalculation;
+            this.rowStart = rowStart;
 
             ResetState();
-        }
-
-        public void SetSheet(string sheetName)
-        {
-            reader.SetSheet(sheetName);
         }
 
         public void Close()
@@ -71,12 +70,37 @@ namespace XLSXTools
 
         public bool ReadNextRecord(out string[] record)
         {
-            FillWithEmptyRecord(out record);
+            record = new string[columnIndexToReadTo];
+            Cell[] cells;
+            bool result = ReadNextCells(out cells);
+            if (result)
+            {
+                for (int i = 0; i < record.Length; i++)
+                {
+                    record[i] = reader.GetCellValue(cells[i]);
+                }
+                return true;
+            }
+            else return false;
+        }
 
-            if (!couldReadLast) return false;
+        public string GetCellValue(Cell cell)
+        {
+            return reader.GetCellValue(cell);
+        }
 
+        public string GetCellFormat(Cell cell)
+        {
+            return reader.GetCellFormat(cell);
+        }
 
+        public bool ReadNextCells(out Cell[] cells)
+        {
+            cells = new Cell[columnIndexToReadTo];
             rowIndexToRead++;
+
+            if (!couldReadLast || rowIndexToRead > rowIndexToReadTo) return false;
+
             do
             {
                 UpdateCellsState(reader.CurrentCell);
@@ -85,18 +109,18 @@ namespace XLSXTools
                 {
                     if (currentColumnIndex - 1 < columnIndexToReadTo)
                     {
-                        record[currentColumnIndex - 1] = currentCellValue;
-
+                        cells[currentColumnIndex - 1] = reader.CurrentCell;
                     }
-                    else
-                    {
-
-                    }
-                }  
+                }
                 else break;
             } while (couldReadLast = reader.ReadNextCell());
 
             return true;
+        }
+
+        public bool IsValidDateTimeFormat(string format)
+        {
+            return reader.IsValidDateTimeFormat(format);
         }
 
         private void FillWithEmptyRecord(out string[] record)
@@ -110,7 +134,7 @@ namespace XLSXTools
 
         private void ResetState()
         {
-            reader = new XLSXReader(srcFilePath, sheetName);
+            reader = new XLSXReader(srcFilePath, sheetName, customRangeCalculation, rowStart);
             reader.ReadNextCell();
 
             currentRowIndex = 0;

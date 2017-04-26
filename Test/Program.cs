@@ -12,14 +12,15 @@ namespace Test
         static void Main(string[] args)
         {
             /*
-            XLSXReader reader = new XLSXReader("Calculations.xlsx");
+            XLSXReader reader = new XLSXReader("read.xlsx", "Sheet2");
             while (reader.ReadNextCell())
             {
-                // Console.WriteLine(reader.GetCellValue(reader.CurrentCell));
+                Console.WriteLine(reader.GetCellValue(reader.CurrentCell));
             }
             reader.Close();
             */
 
+            /*
             XLSXWriter writer = new XLSXWriter("write.xlsx");
 
             // Write a sheet.
@@ -45,19 +46,24 @@ namespace Test
             writer.WriteInline("LOL");
             writer.NewRow();
 
+            writer.SetWorksheet("MyTestSheet1");
+            writer.WriteInline("ADDED TEST");
+
             writer.Finish();
             writer.Close();
+            */
+            
+            XLSXRowReader reader = new XLSXRowReader(@"read.xlsx", "Sheet1", false);
 
-            /*
-            XLSXRowReader reader = new XLSXRowReader(@"C:\Users\Grigorov\Documents\User Created\Apollo\QA\Mass Validation\Validations\Copies\18. Ceded Losses ITD - Current_VE.xlsx");
             string[] record;
-            int recordCount = 0;
             while (reader.ReadNextRecord(out record))
             {
-                Console.WriteLine(++recordCount);
+                foreach (string field in record)
+                    Console.Write(field + ", ");
+                Console.WriteLine();
             }
+
             reader.Close();
-            */
         }
     }
 }
